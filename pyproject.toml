@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=69.0.3", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pykickoff"
+version = "0.1.0"
+requires-python = ">=3.9"
+readme = "README.md"
+description = "Command-line tool designed to take the friction out of starting a new Python project"
+authors = [
+    {name = "Devon", email = "ds.pydev@gmail.com"},
+]
+maintainers = [
+  {name = "Devon", email = "ds.pydev@gmail.com"}
+]
+license = {file = "LICENSE.txt"}
+keywords = [
+    "boilerplate",
+    "Python Packaging",
+    "Template",
+    "quick start",
+    "Devon-GS",
+	"Python"
+]
+classifiers = [
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Operating System :: POSIX :: Linux",
+    # "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS",
+    "Operating System :: MacOS :: MacOS X",
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Operating System :: POSIX :: Linux",
+    # "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS",
+    "Operating System :: MacOS :: MacOS X",
+]
+
+dependencies = [
+    "typer[all]",      # For the CLI
+    "questionary",     # For the pretty interactive questions
+    "jinja2",          # For filling out the templates
+    "rich"             # For beautiful colors/tables
+]
+
+[project.urls]
+Homepage = "https://github.com/Devon-GS/pykickoff"
+Documentation = "https://github.com/Devon-GS/pykickoff"
+
+[project.scripts]
+pylaunch = "pylaunch.main:app"  # This makes 'pykickoff' a command in your terminal
