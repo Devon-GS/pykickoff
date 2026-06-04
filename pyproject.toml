@@ -59,6 +59,5 @@ test = [
     "pytest==9.0.3",
     "mypy==2.1.0",
     "ruff==0.14.10",
-    "pre-commit==4.5.1",
-    "types-tqdm==4.67.0.20250809",
+    "pre-commit==4.6.0",
 ]
