@@ -3,6 +3,6 @@ include LICENSE.txt
 global-include **.typed
 global-include **.pyi
 include tox.ini
-graft templates
+recursive-include src/pykickoff/template/base *.txt *.j2
 
 exclude scripts/**

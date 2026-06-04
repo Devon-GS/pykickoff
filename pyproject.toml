@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pykickoff"
-version = "1.1.0"
+version = "1.2.0"
 requires-python = ">=3.9"
 readme = "README.md"
 description = "Command-line tool designed to take the friction out of starting a new Python project"
@@ -69,3 +69,6 @@ addopts = "--import-mode=importlib"
 
 [tool.setuptools]
 include-package-data = true
+
+[tool.setuptools.package-data]
+"pykickoff.template.base" = ["*.txt", "*.j2"]
