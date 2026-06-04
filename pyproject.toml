@@ -40,10 +40,10 @@ classifiers = [
 ]
 
 dependencies = [
-    "typer[all]",      # For the CLI
-    "questionary",     # For the pretty interactive questions
-    "jinja2",          # For filling out the templates
-    "rich"             # For beautiful colors/tables
+    "typer~=0.0",      		# For the CLI
+    "questionary~=2.1",     # For the pretty interactive questions
+    "jinja2~=3.1",          # For filling out the templates
+    "rich~=15.0"            # For beautiful colors/tables
 ]
 
 [project.urls]
@@ -57,7 +57,7 @@ pykickoff = "pykickoff.__main__:main"  # This makes 'pykickoff' a command in you
 test = [
     "tox==4.32.0",
     "pytest==9.0.3",
-    "mypy==1.19.1",
+    "mypy==2.1.0",
     "ruff==0.14.10",
     "pre-commit==4.5.1",
     "types-tqdm==4.67.0.20250809",

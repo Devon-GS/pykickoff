@@ -1,4 +1,5 @@
 import questionary
+import re
 
 def validate_project_name(text):
 	# Only allow letters, numbers, underscores, and hyphens
@@ -13,8 +14,9 @@ def wizard():
 
 	# Basic questions	
 	answers['project_name'] = questionary.text(
-		"What is your project name?"
-		).ask()
+        "What is your project name?",
+        validate=validate_project_name
+    ).ask()
 	
 	answers['description'] = questionary.text(
 		"Enter a short description:",
