@@ -3,9 +3,9 @@ from pykickoff import ProjectGenerator
 # Simulate the data we'd get from the user questions
 user_input = {
     "project_name": "my-cool-app",
-    "description": "A weather tracking app built in Python.",
-    "author_name": "Author Name",
-    "author_name": "A weather tracking app built in Python.",
+    "description": "A weather tracking app.",
+    "author_name": "Your Name",
+    "is_cli": True
 }
 
 # Run the generator

@@ -53,6 +53,18 @@ class ProjectGenerator:
 		with open(self.project_path / "pyproject.toml", "w") as f:
 			f.write(rendered_content)
 
+	def create_source_dir(self):
+		"""Creates the internal package directory (e.g., my_app/my_app/)"""
+		src_path = self.project_path / "src" / self.data['project_name'].replace("-", "_")
+		src_path.mkdir(parents=True, exist_ok=True)
+		
+		# Create an empty __init__.py to make it a package
+		(src_path / "__init__.py").touch()
+		
+		# Create a basic main.py
+		with open(src_path / "main.py", "w") as f:
+			f.write('def main():\n    print("Hello from your new project!")\n\nif __name__ == "__main__":\n    main()')
+
 	def run(self):
 		"""The main execution flow."""
 		print(f"🚀 Generating {self.data['project_name']}...")
@@ -60,6 +72,7 @@ class ProjectGenerator:
 			self.generate_readme()
 			self.generate_gitignore()
 			self.generate_pyproject()
+			self.create_source_dir()
 			print("✅ Project files created successfully!")
 
 
