@@ -1,11 +1,33 @@
 from .wizard import wizard
 from .generator import ProjectGenerator
+from .utils import initialize_git, setup_venv
+import sys
 
 
 def main() -> None:
-    user_input = wizard()
-    start_project = ProjectGenerator(user_input)
+    # Ask questions
+    user_data = wizard()
+    
+	# Check if user cancelled (hit Ctrl+C)
+    if not user_data['project_name']:
+        print("Setup cancelled.")
+        sys.exit()
+
+	# Generate Files    
+    start_project = ProjectGenerator(user_data)
     start_project.run()
+    
+	# Run Automation
+    project_path = start_project.project_path # Get the path from the generator
+    
+    if user_data['init_git']:
+        initialize_git(project_path)
+        
+    if user_data['create_venv']:
+        setup_venv(project_path)
+
+    print(f"\n🚀 All done! Your project is ready at: {project_path}")
+    print(f"To start: cd {user_data['project_name']} && source .venv/bin/activate")
     
 
 if __name__ == "__main__":
