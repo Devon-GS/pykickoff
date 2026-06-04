@@ -52,3 +52,13 @@ Documentation = "https://github.com/Devon-GS/pykickoff"
 
 [project.scripts]
 pykickoff = "pykickoff.__main__:main"  # This makes 'pykickoff' a command in your terminal
+
+[project.optional-dependencies]
+test = [
+    "tox==4.32.0",
+    "pytest==9.0.3",
+    "mypy==1.19.1",
+    "ruff==0.14.10",
+    "pre-commit==4.5.1",
+    "types-tqdm==4.67.0.20250809",
+]
