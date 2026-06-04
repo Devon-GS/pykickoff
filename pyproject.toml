@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pykickoff"
-version = "1.0.0"
+version = "1.1.0"
 requires-python = ">=3.9"
 readme = "README.md"
 description = "Command-line tool designed to take the friction out of starting a new Python project"
@@ -66,3 +66,6 @@ test = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "--import-mode=importlib"
+
+[tool.setuptools]
+include-package-data = true
