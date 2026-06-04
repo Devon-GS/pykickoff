@@ -1,8 +1,8 @@
 Project Structure
 
-pylaunch/
+pykickoff/
 ├── src/
-│   └── pylaunch/
+│   └── pykickoff/
 │       ├── __init__.py
 │       ├── main.py          # The CLI entry point (Typer/Click logic)
 │       ├── wizard.py        # The questions (Questionary logic)

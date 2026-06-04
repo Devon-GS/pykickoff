@@ -1,6 +1,6 @@
 import questionary
 
-def ask_questions():
+def wizard():
     answers = {}
     answers['project_name'] = questionary.text("What is your project name?").ask()
     answers['type'] = questionary.select(
