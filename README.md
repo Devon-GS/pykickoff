@@ -23,3 +23,7 @@ pykickoff/
 ├── pyproject.toml           # Defines your package and dependencies
 ├── README.md
 └── .gitignore
+
+Adding:
+- basic setup
+- advanced setup (ask to change reqired python, auther email, etc, classifiers, project urls)
