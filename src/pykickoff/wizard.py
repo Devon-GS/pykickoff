@@ -1,51 +1,43 @@
 import questionary
 import re
 
+
 def validate_project_name(text):
-	# Only allow letters, numbers, underscores, and hyphens
-	if not re.match(r"^[a-zA-Z0-9_-]+$", text):
-		return "Project name can only contain letters, numbers, '-' or '_'"
-	return True
+    # Only allow letters, numbers, underscores, and hyphens
+    if not re.match(r"^[a-zA-Z0-9_-]+$", text):
+        return "Project name can only contain letters, numbers, '-' or '_'"
+    return True
+
 
 def wizard():
-	print("\n--- 🛠️  Pykickoff Project Setup ---\n")
-	
-	answers = {}
+    print("\n--- 🛠️  Pykickoff Project Setup ---\n")
 
-	# Basic questions	
-	answers['project_name'] = questionary.text(
-        "What is your project name?",
-        validate=validate_project_name
+    answers = {}
+
+    # Basic questions
+    answers["project_name"] = questionary.text(
+        "What is your project name?", validate=validate_project_name
     ).ask()
-	
-	answers['description'] = questionary.text(
-		"Enter a short description:",
-		default="A new Python project."
-	).ask()
-	
-	answers['author_name'] = questionary.text(
-		"Author name:"
-	).ask()
-	
-	answers['type'] = questionary.select(
-		"What type of project?",
-		choices=["Basic", "FastAPI", "CLI Tool"]
-	).ask()
-	
-	answers['is_cli'] = questionary.confirm(
-		"Is this a CLI tool?",
-		default=False
-	).ask()
 
-	# Automation questions
-	answers['init_git'] = questionary.confirm(
-		"Initialize a Git repository?",
-		default=True
-	).ask()
+    answers["description"] = questionary.text(
+        "Enter a short description:", default="A new Python project."
+    ).ask()
 
-	answers['create_venv'] = questionary.confirm(
-		"Create a virtual environment (.venv)?",
-		default=True
-	).ask()
-	
-	return answers
+    answers["author_name"] = questionary.text("Author name:").ask()
+
+    answers["type"] = questionary.select(
+        "What type of project?", choices=["Basic", "FastAPI", "CLI Tool"]
+    ).ask()
+
+    answers["is_cli"] = questionary.confirm("Is this a CLI tool?", default=False).ask()
+
+    # Automation questions
+    answers["init_git"] = questionary.confirm(
+        "Initialize a Git repository?", default=True
+    ).ask()
+
+    answers["create_venv"] = questionary.confirm(
+        "Create a virtual environment (.venv)?", default=True
+    ).ask()
+
+    return answers

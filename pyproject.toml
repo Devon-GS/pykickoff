@@ -55,10 +55,14 @@ pykickoff = "pykickoff.__main__:main"  # This makes 'pykickoff' a command in you
 
 [project.optional-dependencies]
 test = [
-    "tox==4.32.0",
+    "tox==4.55.1",
     "pytest==9.0.3",
     "mypy==2.1.0",
 	"ty==0.0.43",
-    "ruff==0.14.10",
+    "ruff==0.15.15",
     "pre-commit==4.6.0",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib"
