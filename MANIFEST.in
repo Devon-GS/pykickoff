@@ -4,5 +4,6 @@ global-include **.typed
 global-include **.pyi
 include tox.ini
 recursive-include src/pykickoff/templates/base *.txt *.j2
+recursive-include src/pykickoff/templates/package *.txt *.j2
 
 exclude scripts/**
