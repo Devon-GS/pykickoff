@@ -17,11 +17,15 @@
 
 Pykickoff is a lightweight, interactive CLI scaffolding tool designed to bootstrap new Python projects. By guiding users through a series of questions, it generates standard project files, sets up package structures, initializes Git repositories, and creates virtual environments automatically.
 
+---
+
 ### If you like the repo, it would be awesome if you could add a star to it! It really helps out the visibility. Also for any questions at all we'd love to hear from you at ds.pydev@gmail.com
+
+---
 
 ## Usage
 
-1. **Install Pykickoff** 
+1. **Install Pykickoff**
 
 ```bash
 python -m pip install pykickoff
@@ -53,6 +57,23 @@ The setup guide will prompt you to configure:
 
 ---
 
+## Contributing
+
+Contributions are welcome and encouraged! If you'd like to improve Pykickoff, add new project templates (eg: FastAPI or Docker scaffolding), or fix bugs, please follow these steps:
+
+1. **Fork the repository** on GitHub.
+2. **Clone your fork** locally and install the dependencies.
+3. **Create a new branch** for your feature or bugfix (`git checkout -b feature/add-docker-template`).
+4. **Make your changes** to the codebase. If you are adding new project types, be sure to update `wizard.py` and add the required Jinja2 templates to the `templates/` directory.
+5. **Test your changes** by running the tool locally to ensure the wizard and generation process execute cleanly.
+6. **Commit your changes** with descriptive commit messages.
+7. **Push your branch** to your fork (`git push origin feature/add-docker-template`).
+8. **Open a Pull Request** against the main Pykickoff repository.
+
+If you find a bug or have a feature request, feel free to open an issue in the issue tracker!
+
+---
+
 ## Directory Layout
 
 This project is structured as a standard Python module package:
@@ -78,3 +99,24 @@ pykickoff/
 - **Validation:** Project names are automatically validated using regular expressions to prevent illegal characters in folder and module names.
 - **Rendering:** Values gathered by `wizard.py` are mapped into Jinja2 templates. If a project is specified as a CLI, those conditions are handled dynamically when building out the `pyproject.toml` configuration.
 - **Process Automation:** The tool uses Python's `subprocess` module to run CLI tools (`git`, `python`) directly inside the generated directory paths to ensure seamless environment preparation.
+
+---
+
+## Release Notes
+
+### [1.0.0] - Initial Release
+**Added:**
+- Interactive CLI wizard using `questionary` to capture user project requirements.
+- Core generator logic utilizing `Jinja2` to dynamically render `pyproject.toml` and `README.md` files.
+- Regex validation for safe Python package and directory naming.
+- Scaffolding for standard `src/` directory layouts.
+- Automation utilities to automatically initialize Git repositories and create Python virtual environments (`.venv`).
+
+### [2.0.0] - Basic Release
+**Added:**
+- Basic python poject setup.
+
+**Updated:**
+- Templates: moved `pyproject.toml.j2` to package folder.
+- `main.py`, `generator.py` and `wizard.py` with new basic option.
+- `test_project_generator` with new test for basic options.

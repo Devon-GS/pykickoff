@@ -19,17 +19,23 @@ def wizard():
         "What is your project name?", validate=validate_project_name
     ).ask()
 
-    answers["description"] = questionary.text(
-        "Enter a short description:", default="A new Python project."
-    ).ask()
-
-    answers["author_name"] = questionary.text("Author name:").ask()
-
     answers["type"] = questionary.select(
-        "What type of project?", choices=["Basic", "FastAPI", "CLI Tool"]
+        "What type of project?",
+        choices=["Basic", "Packaged Project"],  # "FastAPI", "CLI Tool"],
     ).ask()
 
-    answers["is_cli"] = questionary.confirm("Is this a CLI tool?", default=False).ask()
+    # basic add main.py with func that prints hello world will be .j2
+
+    if answers["type"] == "Packaged Project":
+        answers["description"] = questionary.text(
+            "Enter a short description:", default="A new Python project."
+        ).ask()
+
+        answers["author_name"] = questionary.text("Author name:").ask()
+
+        answers["is_cli"] = questionary.confirm(
+            "Is this a CLI tool?", default=False
+        ).ask()
 
     # Automation questions
     answers["init_git"] = questionary.confirm(

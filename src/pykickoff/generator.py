@@ -8,8 +8,11 @@ class ProjectGenerator:
         self.project_path = Path.cwd() / project_data["project_name"]
 
         # Setup Jinja2 to look for templates in our internal folder
-        template_dir = Path(__file__).parent / "templates" / "base"
-        self.env = Environment(loader=FileSystemLoader(template_dir))
+        template_base_dir = Path(__file__).parent / "templates" / "base"
+        self.base = Environment(loader=FileSystemLoader(template_base_dir))
+
+        template_package_dir = Path(__file__).parent / "templates" / "package"
+        self.package = Environment(loader=FileSystemLoader(template_package_dir))
 
     def create_project_folder(self):
         """Creates the main directory."""
@@ -22,7 +25,7 @@ class ProjectGenerator:
 
     def generate_readme(self):
         """Fills the README template with data and saves it."""
-        template = self.env.get_template("README.md.j2")
+        template = self.base.get_template("README.md.j2")
         rendered_content = template.render(
             project_name=self.data["project_name"],
             description=self.data.get("description", "A new Python project."),
@@ -33,7 +36,7 @@ class ProjectGenerator:
 
     def generate_gitignore(self):
         """Copies the static gitignore file."""
-        template = self.env.get_template("gitignore.txt")
+        template = self.base.get_template("gitignore.txt")
         content = template.render()  # No variables needed here
 
         with open(self.project_path / ".gitignore", "w") as f:
@@ -41,7 +44,7 @@ class ProjectGenerator:
 
     def generate_pyproject(self):
         """Generates the pyproject.toml file."""
-        template = self.env.get_template("pyproject.toml.j2")
+        template = self.package.get_template("pyproject.toml.j2")
 
         rendered_content = template.render(
             project_name=self.data["project_name"],
@@ -69,7 +72,24 @@ class ProjectGenerator:
                 'def main():\n    print("Hello from your new project!")\n\nif __name__ == "__main__":\n    main()'
             )
 
-    def run(self):
+    def generate_hello_world(self):
+        """Create main.py"""
+        with open(self.project_path / "main.py", "w") as f:
+            f.write(
+                'def main():\n    print("Hello from your new project!")\n\nif __name__ == "__main__":\n    main()'
+            )
+
+    # RUN FUNCTIONS
+    def run_basic(self):
+        """The execution flow for basic project."""
+        print(f"🚀 Generating {self.data['project_name']}...")
+        if self.create_project_folder():
+            self.generate_hello_world()
+            self.generate_readme()
+            self.generate_gitignore()
+            print("✅ Project files created successfully!")
+
+    def run_package(self):
         """The main execution flow."""
         print(f"🚀 Generating {self.data['project_name']}...")
         if self.create_project_folder():
@@ -78,31 +98,3 @@ class ProjectGenerator:
             self.generate_pyproject()
             self.create_source_dir()
             print("✅ Project files created successfully!")
-
-
-# import os
-# from pathlib import Path
-
-# def create_structure(answers):
-#     project_path = Path.cwd() / answers['project_name']
-#     project_path.mkdir(exist_ok=True)
-
-#     # Example: Create the src folder
-#     src_path = project_path / "src"
-#     src_path.mkdir()
-
-#     # More logic to copy templates and fill them with Jinja2...
-
-# def get_files_to_create(answers):
-#     files = ["README.md", "pyproject.toml", ".gitignore"] # Always create
-
-#     if answers['use_docker']:
-#         files.extend(["Dockerfile", ".dockerignore"])
-
-#     if answers['use_github_actions']:
-#         files.append(".github/workflows/tests.yml")
-
-#     if answers['type'] == "FastAPI":
-#         files.extend(["src/main.py", "src/models.py", ".env.example"])
-
-#     return files

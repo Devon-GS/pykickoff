@@ -13,9 +13,14 @@ def main() -> None:
         print("Setup cancelled.")
         sys.exit()
 
-    # Generate Files
+    # Start project Class
     start_project = ProjectGenerator(user_data)
-    start_project.run()
+
+    # Generate Files Basic
+    if user_data["type"] == "Basic":
+        start_project.run_basic()
+    elif user_data["type"] == "Packaged Project":
+        start_project.run_package()
 
     # Run Automation
     project_path = start_project.project_path  # Get the path from the generator
