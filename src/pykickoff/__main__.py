@@ -16,12 +16,12 @@ def main() -> None:
     # Start project Class
     start_project = ProjectGenerator(user_data)
 
-    # Generate Files Basic
+    # Generate Files
     if user_data["type"] == "Basic (Simple script)":
         start_project.run_basic()
     elif user_data["type"] == "Packaged Project":
         start_project.run_package()
-    elif user_data["type"] == "FastAPI  (Web API)":
+    elif user_data["type"] == "FastAPI (Web API)":
         start_project.run_fastapi()
 
     # Run Automation
@@ -32,8 +32,11 @@ def main() -> None:
 
     if user_data["create_venv"]:
         setup_venv(project_path)
-        if user_data["type"] == "FastAPI  (Web API)":
+        if user_data["type"] == "FastAPI (Web API)":
             install_dependencies(project_path)
+
+    if user_data["use_docker"]:
+        start_project.run_docker()
 
     print(f"\n🚀 All done! Your project is ready at: {project_path}")
     print(f"To start: cd {user_data['project_name']} && source .venv/bin/activate")

@@ -24,8 +24,8 @@ def wizard():
         choices=[
             "Basic (Simple script)",
             "Packaged Project",
-            "FastAPI  (Web API)",
-        ],  # "Docker"],
+            "FastAPI (Web API)",
+        ],
     ).ask()
 
     if answers["type"] == "Packaged Project":
@@ -38,6 +38,11 @@ def wizard():
         answers["is_cli"] = questionary.confirm(
             "Is this a CLI tool?", default=False
         ).ask()
+
+    # Ask for docker
+    answers["use_docker"] = questionary.confirm(
+        "Include Docker setup (Dockerfile & .dockerignore)?", default=False
+    ).ask()
 
     # Automation questions
     answers["init_git"] = questionary.confirm(

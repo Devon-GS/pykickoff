@@ -14,8 +14,11 @@ class ProjectGenerator:
         template_package_dir = Path(__file__).parent / "templates" / "package"
         self.package = Environment(loader=FileSystemLoader(template_package_dir))
 
-        template_package_dir = Path(__file__).parent / "templates" / "fastapi"
-        self.fastapi = Environment(loader=FileSystemLoader(template_package_dir))
+        template_fastapi_dir = Path(__file__).parent / "templates" / "fastapi"
+        self.fastapi = Environment(loader=FileSystemLoader(template_fastapi_dir))
+
+        template_docker_dir = Path(__file__).parent / "templates" / "docker"
+        self.docker = Environment(loader=FileSystemLoader(template_docker_dir))
 
     def create_project_folder(self):
         """Creates the main directory."""
@@ -100,6 +103,19 @@ class ProjectGenerator:
         with open(self.project_path / "requirements.txt", "w") as f:
             f.write(req_template.render())
 
+    def generate_docker_files(self):
+        """Generates Dockerfile and .dockerignore."""
+        # 1. Generate Dockerfile
+        template = self.docker.get_template("Dockerfile.j2")
+        content = template.render(use_docker=self.data["use_docker"])
+        with open(self.project_path / "Dockerfile", "w") as f:
+            f.write(content)
+
+        # 2. Generate .dockerignore
+        ignore_template = self.docker.get_template("dockerignore.txt")
+        with open(self.project_path / ".dockerignore", "w") as f:
+            f.write(ignore_template.render())
+
     # RUN FUNCTIONS
     def run_basic(self):
         """The execution flow for basic project."""
@@ -128,3 +144,9 @@ class ProjectGenerator:
             self.generate_gitignore()
             self.generate_fastapi_files()
             print("✅ Project files created successfully!")
+
+    def run_docker(self):
+        """The main execution flow for fastapi."""
+        print(f"🚀 Generating docker files...")
+        self.generate_docker_files()
+        print("✅ Docker files created successfully!")
