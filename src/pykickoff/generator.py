@@ -14,6 +14,9 @@ class ProjectGenerator:
         template_package_dir = Path(__file__).parent / "templates" / "package"
         self.package = Environment(loader=FileSystemLoader(template_package_dir))
 
+        template_package_dir = Path(__file__).parent / "templates" / "fastapi"
+        self.fastapi = Environment(loader=FileSystemLoader(template_package_dir))
+
     def create_project_folder(self):
         """Creates the main directory."""
         if self.project_path.exists():
@@ -79,6 +82,24 @@ class ProjectGenerator:
                 'def main():\n    print("Hello from your new project!")\n\nif __name__ == "__main__":\n    main()'
             )
 
+    def generate_fastapi_files(self):
+        """Creates FastAPI structure."""
+        # 1. Create an 'app' directory inside the project
+        app_dir = self.project_path / "app"
+        app_dir.mkdir(exist_ok=True)
+        (app_dir / "__init__.py").touch()
+
+        # 2. Generate main.py from the FastAPI template
+        template = self.fastapi.get_template("main.py.j2")
+        content = template.render(project_name=self.data["project_name"])
+        with open(app_dir / "main.py", "w") as f:
+            f.write(content)
+
+        # 3. Generate requirements.txt
+        req_template = self.fastapi.get_template("requirements.txt.j2")
+        with open(self.project_path / "requirements.txt", "w") as f:
+            f.write(req_template.render())
+
     # RUN FUNCTIONS
     def run_basic(self):
         """The execution flow for basic project."""
@@ -90,11 +111,20 @@ class ProjectGenerator:
             print("✅ Project files created successfully!")
 
     def run_package(self):
-        """The main execution flow."""
+        """The main execution flow for package."""
         print(f"🚀 Generating {self.data['project_name']}...")
         if self.create_project_folder():
             self.generate_readme()
             self.generate_gitignore()
             self.generate_pyproject()
             self.create_source_dir()
+            print("✅ Project files created successfully!")
+
+    def run_fastapi(self):
+        """The main execution flow for fastapi."""
+        print(f"🚀 Generating {self.data['project_name']}...")
+        if self.create_project_folder():
+            self.generate_readme()
+            self.generate_gitignore()
+            self.generate_fastapi_files()
             print("✅ Project files created successfully!")

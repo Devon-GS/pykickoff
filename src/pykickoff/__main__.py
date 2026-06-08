@@ -1,6 +1,6 @@
 from .wizard import wizard
 from .generator import ProjectGenerator
-from .utils import initialize_git, setup_venv
+from .utils import initialize_git, setup_venv, install_dependencies
 import sys
 
 
@@ -17,10 +17,12 @@ def main() -> None:
     start_project = ProjectGenerator(user_data)
 
     # Generate Files Basic
-    if user_data["type"] == "Basic":
+    if user_data["type"] == "Basic (Simple script)":
         start_project.run_basic()
     elif user_data["type"] == "Packaged Project":
         start_project.run_package()
+    elif user_data["type"] == "FastAPI  (Web API)":
+        start_project.run_fastapi()
 
     # Run Automation
     project_path = start_project.project_path  # Get the path from the generator
@@ -30,6 +32,8 @@ def main() -> None:
 
     if user_data["create_venv"]:
         setup_venv(project_path)
+        if user_data["type"] == "FastAPI  (Web API)":
+            install_dependencies(project_path)
 
     print(f"\n🚀 All done! Your project is ready at: {project_path}")
     print(f"To start: cd {user_data['project_name']} && source .venv/bin/activate")

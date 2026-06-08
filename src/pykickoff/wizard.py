@@ -21,10 +21,12 @@ def wizard():
 
     answers["type"] = questionary.select(
         "What type of project?",
-        choices=["Basic", "Packaged Project"],  # "FastAPI", "CLI Tool"],
+        choices=[
+            "Basic (Simple script)",
+            "Packaged Project",
+            "FastAPI  (Web API)",
+        ],  # "Docker"],
     ).ask()
-
-    # basic add main.py with func that prints hello world will be .j2
 
     if answers["type"] == "Packaged Project":
         answers["description"] = questionary.text(
