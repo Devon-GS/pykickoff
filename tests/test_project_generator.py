@@ -27,6 +27,7 @@ def project_data():
         "description": "A test project description",
         "author_name": "Test Author",
         "is_cli": True,
+        "use_docker": True,  # Added for Docker support
     }
 
 
@@ -59,6 +60,13 @@ def generator(tmp_path, monkeypatch, project_data):
         mock_template_fastapi.render.return_value = "mocked_file_content"
         mock_env_fastapi.get_template.return_value = mock_template_fastapi
         gen.fastapi = mock_env_fastapi
+
+        # Mock the 'docker' template environment
+        mock_env_docker = MagicMock()
+        mock_template_docker = MagicMock()
+        mock_template_docker.render.return_value = "mocked_file_content"
+        mock_env_docker.get_template.return_value = mock_template_docker
+        gen.docker = mock_env_docker
 
         yield gen
 
@@ -151,27 +159,42 @@ def test_generate_hello_world(generator):
 
 
 def test_generate_fastapi_files(generator):
-    """Tests creation of FastAPI structure (app/main.py and requirements.txt)"""
     generator.create_project_folder()
     generator.generate_fastapi_files()
 
-    # 1. Check app directory and __init__.py
     app_dir = generator.project_path / "app"
     assert app_dir.exists()
     assert app_dir.is_dir()
     assert (app_dir / "__init__.py").exists()
 
-    # 2. Check app/main.py
     main_py_path = app_dir / "main.py"
     assert main_py_path.exists()
     assert main_py_path.read_text() == "mocked_file_content"
     generator.fastapi.get_template.assert_any_call("main.py.j2")
 
-    # 3. Check requirements.txt
     req_path = generator.project_path / "requirements.txt"
     assert req_path.exists()
     assert req_path.read_text() == "mocked_file_content"
     generator.fastapi.get_template.assert_any_call("requirements.txt.j2")
+
+
+def test_generate_docker_files(generator):
+    """Tests creation of Dockerfile and .dockerignore"""
+    generator.create_project_folder()  # Ensure path exists for test
+    generator.generate_docker_files()
+
+    # 1. Check Dockerfile
+    dockerfile_path = generator.project_path / "Dockerfile"
+    assert dockerfile_path.exists()
+    assert dockerfile_path.read_text() == "mocked_file_content"
+    generator.docker.get_template.assert_any_call("Dockerfile.j2")
+    generator.docker.get_template().render.assert_any_call(use_docker=True)
+
+    # 2. Check .dockerignore
+    dockerignore_path = generator.project_path / ".dockerignore"
+    assert dockerignore_path.exists()
+    assert dockerignore_path.read_text() == "mocked_file_content"
+    generator.docker.get_template.assert_any_call("dockerignore.txt")
 
 
 # --- Run Methods Tests ---
@@ -225,15 +248,23 @@ def test_run_fastapi_success(
     mock_fastapi.assert_called_once()
 
 
+@patch.object(ProjectGenerator, "generate_docker_files")
+def test_run_docker_success(mock_docker, generator):
+    """Tests run_docker execution flow."""
+    generator.run_docker()
+    mock_docker.assert_called_once()
+
+
 @patch.object(ProjectGenerator, "create_project_folder")
 @patch.object(ProjectGenerator, "generate_readme")
 def test_run_aborts_if_folder_exists(mock_readme, mock_create, generator):
-    """Tests all run commands abort if folder already exists."""
+    """Tests all standard run commands abort if folder already exists."""
     mock_create.return_value = False
 
     generator.run_basic()
     generator.run_package()
     generator.run_fastapi()
+    # Note: run_docker does not check for folder creation, so we don't test it here.
 
     assert mock_create.call_count == 3
     mock_readme.assert_not_called()
@@ -285,14 +316,9 @@ def test_setup_venv(mock_run_command):
     )
 
 
-# --- install_dependencies Tests ---
-
-
 @patch("pykickoff.utils.subprocess.run")
-@patch("pykickoff.utils.os.name", "posix")  # Mock being on Mac/Linux
+@patch("pykickoff.utils.os.name", "posix")
 def test_install_dependencies_posix(mock_subprocess_run, tmp_path, capsys):
-    """Tests pip install with Mac/Linux paths."""
-    # Create fake requirements.txt so the function triggers
     (tmp_path / "requirements.txt").touch()
 
     install_dependencies(tmp_path)
@@ -309,10 +335,8 @@ def test_install_dependencies_posix(mock_subprocess_run, tmp_path, capsys):
 
 
 @patch("pykickoff.utils.subprocess.run")
-@patch("pykickoff.utils.os.name", "nt")  # Mock being on Windows
+@patch("pykickoff.utils.os.name", "nt")
 def test_install_dependencies_windows(mock_subprocess_run, tmp_path, capsys):
-    """Tests pip install with Windows paths."""
-    # Create fake requirements.txt so the function triggers
     (tmp_path / "requirements.txt").touch()
 
     install_dependencies(tmp_path)
@@ -332,11 +356,7 @@ def test_install_dependencies_windows(mock_subprocess_run, tmp_path, capsys):
 def test_install_dependencies_no_requirements_file(
     mock_subprocess_run, tmp_path, capsys
 ):
-    """Tests that subprocess isn't called if requirements.txt doesn't exist."""
-    # Deliberately NOT creating requirements.txt
-
     install_dependencies(tmp_path)
-
     mock_subprocess_run.assert_not_called()
     captured = capsys.readouterr()
     assert "❌ No requirements.txt detected!" in captured.out

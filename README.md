@@ -119,4 +119,26 @@ pykickoff/
 **Updated:**
 - Templates: moved `pyproject.toml.j2` to package folder.
 - `main.py`, `generator.py` and `wizard.py` with new basic option.
-- `test_project_generator` with new test for basic options.
+- `test_project_generator` with new tests for basic options.
+
+### [2.1.0] - Basic Release
+**Updated:**
+- Python projected option
+
+### [2.2.0] - Basic Release
+**Added:**
+- Fastapi python poject setup.
+
+**Updated:**
+- Templates: add fastapi folder with `main.py.j2` and `requirements.txt.j2`
+- `main.py`, `generator.py` and `wizard.py` with new fastapi option.
+- `test_project_generator` with new tests for fastapi options.
+
+### [2.3.0] - Basic Release
+**Added:**
+- docker option.
+
+**Updated:**
+- Templates: add docker folder with `Dockerfile.j2` and `dockerignore.txt`
+- `main.py`, `generator.py` and `wizard.py` with new docker option.
+- `test_project_generator` with new tests for docker options.

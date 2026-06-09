@@ -147,6 +147,6 @@ class ProjectGenerator:
 
     def run_docker(self):
         """The main execution flow for fastapi."""
-        print(f"🚀 Generating docker files...")
+        print("🚀 Generating docker files...")
         self.generate_docker_files()
         print("✅ Docker files created successfully!")
