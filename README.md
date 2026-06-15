@@ -19,7 +19,7 @@ Pykickoff is a lightweight, interactive CLI scaffolding tool designed to bootstr
 
 ---
 
-### If you like the repo, it would be awesome if you could add a star to it! It really helps out the visibility. Also for any questions at all we'd love to hear from you at ds.pydev@gmail.com
+### If you like the repo, it would be awesome if you could add a star to it! It really helps out the visibility. Also for any questions at all we'd love to hear from you at ds.pydev@gmail.com also you can check our wesite [Pykickoff](https://devon-gs.github.io/pykickoff-docs/).
 
 ---
 
