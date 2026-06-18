@@ -20,6 +20,9 @@ class ProjectGenerator:
         template_docker_dir = Path(__file__).parent / "templates" / "docker"
         self.docker = Environment(loader=FileSystemLoader(template_docker_dir))
 
+        template_ci_dir = Path(__file__).parent / "templates" / "cicd"
+        self.ci = Environment(loader=FileSystemLoader(template_ci_dir))
+
     def create_project_folder(self):
         """Creates the main directory."""
         if self.project_path.exists():
@@ -116,6 +119,39 @@ class ProjectGenerator:
         with open(self.project_path / ".dockerignore", "w") as f:
             f.write(ignore_template.render())
 
+    # Github actions
+    def generate_github_actions(self):
+        """Creates the .github/workflows directory and CI yaml file."""
+        # Create .github/workflows/ folder
+        github_dir = self.project_path / ".github" / "workflows"
+        github_dir.mkdir(parents=True, exist_ok=True)
+
+        # Generate ci.yml
+        template = self.ci.get_template("ci.yml.j2")
+        with open(github_dir / "ci.yml", "w") as f:
+            f.write(template.render())
+
+    def generate_tests(self):
+        """Creates a tests folder with a basic passing test."""
+        # Create tests/ folder
+        test_dir = self.project_path / "tests"
+        test_dir.mkdir(exist_ok=True)
+        (test_dir / "__init__.py").touch()
+
+        # Generate test file
+        template = self.ci.get_template("test_basic.py.j2")
+        content = template.render(
+            project_type=self.data["project_type"],
+            project_name=self.data["project_name"],
+        )
+
+        # In FastAPI, we test the API. Otherwise, simple math test.
+        file_name = (
+            "test_api.py" if "FastAPI" in self.data["project_type"] else "test_basic.py"
+        )
+        with open(test_dir / file_name, "w") as f:
+            f.write(content)
+
     # RUN FUNCTIONS
     def run_basic(self):
         """The execution flow for basic project."""
@@ -146,7 +182,14 @@ class ProjectGenerator:
             print("✅ Project files created successfully!")
 
     def run_docker(self):
-        """The main execution flow for fastapi."""
+        """The main execution flow for docker."""
         print("🚀 Generating docker files...")
         self.generate_docker_files()
         print("✅ Docker files created successfully!")
+
+    def run_github_actions(self):
+        """The main execution flow for github actions."""
+        print("🚀 Generating Github Action files...")
+        self.generate_github_actions()
+        self.generate_tests()
+        print("✅ Github Action files created successfully!")

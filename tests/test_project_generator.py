@@ -27,7 +27,8 @@ def project_data():
         "description": "A test project description",
         "author_name": "Test Author",
         "is_cli": True,
-        "use_docker": True,  # Added for Docker support
+        "use_docker": True,
+        "project_type": "Basic",  # Added for CI/CD test generation
     }
 
 
@@ -67,6 +68,13 @@ def generator(tmp_path, monkeypatch, project_data):
         mock_template_docker.render.return_value = "mocked_file_content"
         mock_env_docker.get_template.return_value = mock_template_docker
         gen.docker = mock_env_docker
+
+        # Mock the 'ci' template environment
+        mock_env_ci = MagicMock()
+        mock_template_ci = MagicMock()
+        mock_template_ci.render.return_value = "mocked_file_content"
+        mock_env_ci.get_template.return_value = mock_template_ci
+        gen.ci = mock_env_ci
 
         yield gen
 
@@ -183,18 +191,65 @@ def test_generate_docker_files(generator):
     generator.create_project_folder()  # Ensure path exists for test
     generator.generate_docker_files()
 
-    # 1. Check Dockerfile
     dockerfile_path = generator.project_path / "Dockerfile"
     assert dockerfile_path.exists()
     assert dockerfile_path.read_text() == "mocked_file_content"
     generator.docker.get_template.assert_any_call("Dockerfile.j2")
     generator.docker.get_template().render.assert_any_call(use_docker=True)
 
-    # 2. Check .dockerignore
     dockerignore_path = generator.project_path / ".dockerignore"
     assert dockerignore_path.exists()
     assert dockerignore_path.read_text() == "mocked_file_content"
     generator.docker.get_template.assert_any_call("dockerignore.txt")
+
+
+def test_generate_github_actions(generator):
+    """Tests creation of GitHub workflows directory and ci.yml"""
+    generator.create_project_folder()
+    generator.generate_github_actions()
+
+    github_dir = generator.project_path / ".github" / "workflows"
+    assert github_dir.exists()
+    assert github_dir.is_dir()
+
+    ci_file = github_dir / "ci.yml"
+    assert ci_file.exists()
+    assert ci_file.read_text() == "mocked_file_content"
+    generator.ci.get_template.assert_any_call("ci.yml.j2")
+
+
+def test_generate_tests_basic(generator):
+    """Tests creation of tests folder and test_basic.py"""
+    generator.create_project_folder()
+    generator.generate_tests()
+
+    test_dir = generator.project_path / "tests"
+    assert test_dir.exists()
+    assert (test_dir / "__init__.py").exists()
+
+    test_file = test_dir / "test_basic.py"
+    assert test_file.exists()
+    assert test_file.read_text() == "mocked_file_content"
+
+    generator.ci.get_template.assert_any_call("test_basic.py.j2")
+    generator.ci.get_template().render.assert_any_call(
+        project_type="Basic", project_name="my-test-project"
+    )
+
+
+def test_generate_tests_fastapi(generator):
+    """Tests that test file is named test_api.py when project_type is FastAPI"""
+    # Change the project type logic
+    generator.data["project_type"] = "FastAPI Project"
+    generator.create_project_folder()
+    generator.generate_tests()
+
+    test_dir = generator.project_path / "tests"
+    assert test_dir.exists()
+
+    test_file = test_dir / "test_api.py"  # File name should change!
+    assert test_file.exists()
+    assert test_file.read_text() == "mocked_file_content"
 
 
 # --- Run Methods Tests ---
@@ -250,9 +305,17 @@ def test_run_fastapi_success(
 
 @patch.object(ProjectGenerator, "generate_docker_files")
 def test_run_docker_success(mock_docker, generator):
-    """Tests run_docker execution flow."""
     generator.run_docker()
     mock_docker.assert_called_once()
+
+
+@patch.object(ProjectGenerator, "generate_github_actions")
+@patch.object(ProjectGenerator, "generate_tests")
+def test_run_github_actions_success(mock_tests, mock_github, generator):
+    """Tests run_github_actions execution flow."""
+    generator.run_github_actions()
+    mock_github.assert_called_once()
+    mock_tests.assert_called_once()
 
 
 @patch.object(ProjectGenerator, "create_project_folder")
@@ -264,7 +327,7 @@ def test_run_aborts_if_folder_exists(mock_readme, mock_create, generator):
     generator.run_basic()
     generator.run_package()
     generator.run_fastapi()
-    # Note: run_docker does not check for folder creation, so we don't test it here.
+    # run_docker & run_github_actions don't check for folder creation, skipped here.
 
     assert mock_create.call_count == 3
     mock_readme.assert_not_called()

@@ -19,7 +19,7 @@ def wizard():
         "What is your project name?", validate=validate_project_name
     ).ask()
 
-    answers["type"] = questionary.select(
+    answers["project_type"] = questionary.select(
         "What type of project?",
         choices=[
             "Basic (Simple script)",
@@ -28,20 +28,25 @@ def wizard():
         ],
     ).ask()
 
-    if answers["type"] == "Packaged Project":
+    if answers["project_type"] == "Packaged Project":
         answers["description"] = questionary.text(
             "Enter a short description:", default="A new Python project."
         ).ask()
 
         answers["author_name"] = questionary.text("Author name:").ask()
 
-        answers["is_cli"] = questionary.confirm(
-            "Is this a CLI tool?", default=False
-        ).ask()
+        # answers["is_cli"] = questionary.confirm(
+        # 	"Is this a CLI tool?", default=False
+        # ).ask()
 
     # Ask for docker
     answers["use_docker"] = questionary.confirm(
         "Include Docker setup (Dockerfile & .dockerignore)?", default=False
+    ).ask()
+
+    # Ask CI
+    answers["use_github_actions"] = questionary.confirm(
+        "Setup GitHub Actions (Automated testing)?", default=False
     ).ask()
 
     # Automation questions
