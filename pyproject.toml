@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pykickoff"
-version = "2.3.0"
+version = "2.4.0"
 requires-python = ">=3.9"
 readme = "README.md"
 description = "Command-line tool designed to take the friction out of starting a new Python project"

@@ -85,13 +85,13 @@ pykickoff/
 ├── generator.py         # File creation and Jinja2 rendering logic
 ├── utils.py             # Automation helpers (Git, venv subprocess calls)
 ├── wizard.py            # User prompt questions and CLI validation
-└── templates/
-    └── base/            # Subfolder expected to contain template files
-        ├── README.md.j2
-        ├── gitignore.txt
-        └── pyproject.toml.j2
+└── templates/           # Jinja2 template categories
+    ├── base/
+    ├── cicd/
+    ├── docker/
+    ├── fastapi/
+    └── package/
 ```
-
 ---
 
 ## Under the Hood
@@ -104,6 +104,48 @@ pykickoff/
 
 ## Release Notes
 
+### [2.4.0] - CI/CD & Packaged Project Extras
+**Added:**
+- GitHub Actions CI/CD pipeline option with automated test file scaffolding (`test_basic.py` / `test_api.py`).
+- Extensive package templates for the "Packaged Project" type (choose between `.pre-commit-config.yaml`, `MANIFEST.in`, `requirements.txt`, `requirements_dev.txt`, and `tox.ini`).
+- Full dependency automation: automatically installs `requirements.txt` / `requirements_dev.txt` and executes `pre-commit install` if chosen.
+
+**Updated:**
+- Separated Jinja2 template environments into distinct categorical sub-directories (`base`, `package`, `fastapi`, `docker`, `cicd`).
+- `wizard.py` expanded with multi-select checkboxes for package extras and new yes/no flows for GitHub actions.
+- `__main__.py` branched out execution methods (`run_basic`, `run_package`, `run_fastapi`) for cleaner project generation logic.
+
+### [2.3.0] - Docker Release
+**Added:**
+- Docker option.
+
+**Updated:**
+- Templates: add docker folder with `Dockerfile.j2` and `dockerignore.txt`
+- `main.py`, `generator.py` and `wizard.py` with new docker option.
+- `test_project_generator` with new tests for docker options.
+
+### [2.2.0] - FastAPI Release
+**Added:**
+- FastAPI python project setup.
+
+**Updated:**
+- Templates: add fastapi folder with `main.py.j2` and `requirements.txt.j2`
+- `main.py`, `generator.py` and `wizard.py` with new fastapi option.
+- `test_project_generator` with new tests for fastapi options.
+
+### [2.1.0] - Minor Updates
+**Updated:**
+- Python project options.
+
+### [2.0.0] - Basic Release
+**Added:**
+- Basic python project setup.
+
+**Updated:**
+- Templates: moved `pyproject.toml.j2` to package folder.
+- `main.py`, `generator.py` and `wizard.py` with new basic option.
+- `test_project_generator` with new tests for basic options.
+
 ### [1.0.0] - Initial Release
 **Added:**
 - Interactive CLI wizard using `questionary` to capture user project requirements.
@@ -111,34 +153,3 @@ pykickoff/
 - Regex validation for safe Python package and directory naming.
 - Scaffolding for standard `src/` directory layouts.
 - Automation utilities to automatically initialize Git repositories and create Python virtual environments (`.venv`).
-
-### [2.0.0] - Basic Release
-**Added:**
-- Basic python poject setup.
-
-**Updated:**
-- Templates: moved `pyproject.toml.j2` to package folder.
-- `main.py`, `generator.py` and `wizard.py` with new basic option.
-- `test_project_generator` with new tests for basic options.
-
-### [2.1.0] - Basic Release
-**Updated:**
-- Python projected option
-
-### [2.2.0] - Basic Release
-**Added:**
-- Fastapi python poject setup.
-
-**Updated:**
-- Templates: add fastapi folder with `main.py.j2` and `requirements.txt.j2`
-- `main.py`, `generator.py` and `wizard.py` with new fastapi option.
-- `test_project_generator` with new tests for fastapi options.
-
-### [2.3.0] - Basic Release
-**Added:**
-- docker option.
-
-**Updated:**
-- Templates: add docker folder with `Dockerfile.j2` and `dockerignore.txt`
-- `main.py`, `generator.py` and `wizard.py` with new docker option.
-- `test_project_generator` with new tests for docker options.
