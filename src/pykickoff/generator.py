@@ -81,6 +81,40 @@ class ProjectGenerator:
                 'def main():\n    print("Hello from your new project!")\n\nif __name__ == "__main__":\n    main()'
             )
 
+    def generate_package_extras(self):
+        """Generates selected extra files for packaged projects."""
+        extras = self.data.get("package_extras", [])
+
+        if ".pre-commit-config.yaml" in extras:
+            template = self.package.get_template("pre-commit-config.yaml.j2")
+            with open(self.project_path / ".pre-commit-config.yaml", "w") as f:
+                f.write(template.render())
+
+        if "MANIFEST.in" in extras:
+            template = self.package.get_template("MANIFEST.in.j2")
+            with open(self.project_path / "MANIFEST.in", "w") as f:
+                f.write(template.render())
+
+        if "requirements.txt" in extras:
+            # Create empty file as requested
+            (self.project_path / "requirements.txt").touch()
+
+        if "requirements_dev.txt" in extras:
+            # We add pre-commit and tox to dev requirements if they selected them!
+            dev_packages = ["pytest"]
+            if ".pre-commit-config.yaml" in extras:
+                dev_packages.append("pre-commit")
+            if "tox.ini" in extras:
+                dev_packages.append("tox")
+
+            with open(self.project_path / "requirements_dev.txt", "w") as f:
+                f.write("\n".join(dev_packages) + "\n")
+
+        if "tox.ini" in extras:
+            template = self.package.get_template("tox.ini.j2")
+            with open(self.project_path / "tox.ini", "w") as f:
+                f.write(template.render())
+
     def generate_hello_world(self):
         """Create main.py"""
         with open(self.project_path / "main.py", "w") as f:
@@ -170,6 +204,7 @@ class ProjectGenerator:
             self.generate_gitignore()
             self.generate_pyproject()
             self.create_source_dir()
+            self.generate_package_extras()
             print("✅ Project files created successfully!")
 
     def run_fastapi(self):

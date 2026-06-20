@@ -35,6 +35,17 @@ def wizard():
 
         answers["author_name"] = questionary.text("Author name:").ask()
 
+        answers["package_extras"] = questionary.checkbox(
+            "Select additional packaging files to generate (Space to select, Enter to confirm):",
+            choices=[
+                ".pre-commit-config.yaml",
+                "MANIFEST.in",
+                "requirements.txt",
+                "requirements_dev.txt",
+                "tox.ini",
+            ],
+        ).ask()
+
         # answers["is_cli"] = questionary.confirm(
         # 	"Is this a CLI tool?", default=False
         # ).ask()

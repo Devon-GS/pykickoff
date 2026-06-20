@@ -27,13 +27,14 @@ def main() -> None:
     # Run Automation
     project_path = start_project.project_path  # Get the path from the generator
 
+    # Git MUST be initialized before we try to install pre-commit hooks!
     if user_data["init_git"]:
         initialize_git(project_path)
 
+    # Venv MUST be initialized before we try to pip install
     if user_data["create_venv"]:
         setup_venv(project_path)
-        if user_data["project_type"] == "FastAPI (Web API)":
-            install_dependencies(project_path)
+        install_dependencies(project_path)
 
     if user_data["use_docker"]:
         start_project.run_docker()

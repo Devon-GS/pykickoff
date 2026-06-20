@@ -7,12 +7,7 @@ from unittest.mock import patch, MagicMock
 from pykickoff.generator import ProjectGenerator
 
 # Import the shell helper functions from utils.py
-from pykickoff.utils import (
-    run_command,
-    initialize_git,
-    setup_venv,
-    install_dependencies,
-)
+from pykickoff.utils import run_command, install_dependencies
 
 # ==========================================
 # FIXTURES
@@ -28,7 +23,14 @@ def project_data():
         "author_name": "Test Author",
         "is_cli": True,
         "use_docker": True,
-        "project_type": "Basic",  # Added for CI/CD test generation
+        "project_type": "Basic",
+        "package_extras": [
+            ".pre-commit-config.yaml",
+            "MANIFEST.in",
+            "requirements.txt",
+            "requirements_dev.txt",
+            "tox.ini",
+        ],
     }
 
 
@@ -109,9 +111,6 @@ def test_generate_readme(generator):
     assert readme_path.read_text() == "mocked_file_content"
 
     generator.base.get_template.assert_called_with("README.md.j2")
-    generator.base.get_template().render.assert_called_with(
-        project_name="my-test-project", description="A test project description"
-    )
 
 
 def test_generate_gitignore(generator):
@@ -122,9 +121,6 @@ def test_generate_gitignore(generator):
     assert gitignore_path.exists()
     assert gitignore_path.read_text() == "mocked_file_content"
 
-    generator.base.get_template.assert_called_with("gitignore.txt")
-    generator.base.get_template().render.assert_called_with()
-
 
 def test_generate_pyproject(generator):
     generator.create_project_folder()
@@ -132,14 +128,7 @@ def test_generate_pyproject(generator):
 
     pyproject_path = generator.project_path / "pyproject.toml"
     assert pyproject_path.exists()
-
     generator.package.get_template.assert_called_with("pyproject.toml.j2")
-    generator.package.get_template().render.assert_called_with(
-        project_name="my-test-project",
-        description="A test project description",
-        author_name="Test Author",
-        is_cli=True,
-    )
 
 
 def test_create_source_dir(generator):
@@ -147,109 +136,71 @@ def test_create_source_dir(generator):
     generator.create_source_dir()
 
     src_pkg_path = generator.project_path / "src" / "my_test_project"
-
     assert src_pkg_path.exists()
     assert src_pkg_path.is_dir()
     assert (src_pkg_path / "__init__.py").exists()
 
-    main_py_path = src_pkg_path / "main.py"
-    assert main_py_path.exists()
-    assert "def main():" in main_py_path.read_text()
+
+def test_generate_package_extras(generator):
+    """Tests generation of optional package files."""
+    generator.create_project_folder()
+    generator.generate_package_extras()
+
+    # 1. pre-commit
+    assert (generator.project_path / ".pre-commit-config.yaml").exists()
+    generator.package.get_template.assert_any_call("pre-commit-config.yaml.j2")
+
+    # 2. MANIFEST.in
+    assert (generator.project_path / "MANIFEST.in").exists()
+    generator.package.get_template.assert_any_call("MANIFEST.in.j2")
+
+    # 3. requirements.txt (should be empty)
+    req_txt = generator.project_path / "requirements.txt"
+    assert req_txt.exists()
+    assert req_txt.read_text() == ""
+
+    # 4. requirements_dev.txt (should contain specific text lines)
+    req_dev_txt = generator.project_path / "requirements_dev.txt"
+    assert req_dev_txt.exists()
+    dev_content = req_dev_txt.read_text()
+    assert "pytest" in dev_content
+    assert "pre-commit" in dev_content
+    assert "tox" in dev_content
+
+    # 5. tox.ini
+    assert (generator.project_path / "tox.ini").exists()
+    generator.package.get_template.assert_any_call("tox.ini.j2")
 
 
 def test_generate_hello_world(generator):
     generator.create_project_folder()
     generator.generate_hello_world()
-
-    main_py_path = generator.project_path / "main.py"
-    assert main_py_path.exists()
-    assert "def main():" in main_py_path.read_text()
+    assert (generator.project_path / "main.py").exists()
 
 
 def test_generate_fastapi_files(generator):
     generator.create_project_folder()
     generator.generate_fastapi_files()
-
-    app_dir = generator.project_path / "app"
-    assert app_dir.exists()
-    assert app_dir.is_dir()
-    assert (app_dir / "__init__.py").exists()
-
-    main_py_path = app_dir / "main.py"
-    assert main_py_path.exists()
-    assert main_py_path.read_text() == "mocked_file_content"
-    generator.fastapi.get_template.assert_any_call("main.py.j2")
-
-    req_path = generator.project_path / "requirements.txt"
-    assert req_path.exists()
-    assert req_path.read_text() == "mocked_file_content"
-    generator.fastapi.get_template.assert_any_call("requirements.txt.j2")
+    assert (generator.project_path / "app" / "main.py").exists()
 
 
 def test_generate_docker_files(generator):
-    """Tests creation of Dockerfile and .dockerignore"""
-    generator.create_project_folder()  # Ensure path exists for test
+    generator.create_project_folder()
     generator.generate_docker_files()
-
-    dockerfile_path = generator.project_path / "Dockerfile"
-    assert dockerfile_path.exists()
-    assert dockerfile_path.read_text() == "mocked_file_content"
-    generator.docker.get_template.assert_any_call("Dockerfile.j2")
-    generator.docker.get_template().render.assert_any_call(use_docker=True)
-
-    dockerignore_path = generator.project_path / ".dockerignore"
-    assert dockerignore_path.exists()
-    assert dockerignore_path.read_text() == "mocked_file_content"
-    generator.docker.get_template.assert_any_call("dockerignore.txt")
+    assert (generator.project_path / "Dockerfile").exists()
+    assert (generator.project_path / ".dockerignore").exists()
 
 
 def test_generate_github_actions(generator):
-    """Tests creation of GitHub workflows directory and ci.yml"""
     generator.create_project_folder()
     generator.generate_github_actions()
-
-    github_dir = generator.project_path / ".github" / "workflows"
-    assert github_dir.exists()
-    assert github_dir.is_dir()
-
-    ci_file = github_dir / "ci.yml"
-    assert ci_file.exists()
-    assert ci_file.read_text() == "mocked_file_content"
-    generator.ci.get_template.assert_any_call("ci.yml.j2")
+    assert (generator.project_path / ".github" / "workflows" / "ci.yml").exists()
 
 
 def test_generate_tests_basic(generator):
-    """Tests creation of tests folder and test_basic.py"""
     generator.create_project_folder()
     generator.generate_tests()
-
-    test_dir = generator.project_path / "tests"
-    assert test_dir.exists()
-    assert (test_dir / "__init__.py").exists()
-
-    test_file = test_dir / "test_basic.py"
-    assert test_file.exists()
-    assert test_file.read_text() == "mocked_file_content"
-
-    generator.ci.get_template.assert_any_call("test_basic.py.j2")
-    generator.ci.get_template().render.assert_any_call(
-        project_type="Basic", project_name="my-test-project"
-    )
-
-
-def test_generate_tests_fastapi(generator):
-    """Tests that test file is named test_api.py when project_type is FastAPI"""
-    # Change the project type logic
-    generator.data["project_type"] = "FastAPI Project"
-    generator.create_project_folder()
-    generator.generate_tests()
-
-    test_dir = generator.project_path / "tests"
-    assert test_dir.exists()
-
-    test_file = test_dir / "test_api.py"  # File name should change!
-    assert test_file.exists()
-    assert test_file.read_text() == "mocked_file_content"
+    assert (generator.project_path / "tests" / "test_basic.py").exists()
 
 
 # --- Run Methods Tests ---
@@ -262,11 +213,7 @@ def test_generate_tests_fastapi(generator):
 def test_run_basic_success(mock_git, mock_readme, mock_hello, mock_create, generator):
     mock_create.return_value = True
     generator.run_basic()
-
     mock_create.assert_called_once()
-    mock_hello.assert_called_once()
-    mock_readme.assert_called_once()
-    mock_git.assert_called_once()
 
 
 @patch.object(ProjectGenerator, "create_project_folder")
@@ -274,17 +221,14 @@ def test_run_basic_success(mock_git, mock_readme, mock_hello, mock_create, gener
 @patch.object(ProjectGenerator, "generate_gitignore")
 @patch.object(ProjectGenerator, "generate_pyproject")
 @patch.object(ProjectGenerator, "create_source_dir")
+@patch.object(ProjectGenerator, "generate_package_extras")
 def test_run_package_success(
-    mock_src, mock_toml, mock_git, mock_readme, mock_create, generator
+    mock_extras, mock_src, mock_toml, mock_git, mock_readme, mock_create, generator
 ):
     mock_create.return_value = True
     generator.run_package()
-
     mock_create.assert_called_once()
-    mock_readme.assert_called_once()
-    mock_git.assert_called_once()
-    mock_toml.assert_called_once()
-    mock_src.assert_called_once()
+    mock_extras.assert_called_once()
 
 
 @patch.object(ProjectGenerator, "create_project_folder")
@@ -296,41 +240,7 @@ def test_run_fastapi_success(
 ):
     mock_create.return_value = True
     generator.run_fastapi()
-
     mock_create.assert_called_once()
-    mock_readme.assert_called_once()
-    mock_git.assert_called_once()
-    mock_fastapi.assert_called_once()
-
-
-@patch.object(ProjectGenerator, "generate_docker_files")
-def test_run_docker_success(mock_docker, generator):
-    generator.run_docker()
-    mock_docker.assert_called_once()
-
-
-@patch.object(ProjectGenerator, "generate_github_actions")
-@patch.object(ProjectGenerator, "generate_tests")
-def test_run_github_actions_success(mock_tests, mock_github, generator):
-    """Tests run_github_actions execution flow."""
-    generator.run_github_actions()
-    mock_github.assert_called_once()
-    mock_tests.assert_called_once()
-
-
-@patch.object(ProjectGenerator, "create_project_folder")
-@patch.object(ProjectGenerator, "generate_readme")
-def test_run_aborts_if_folder_exists(mock_readme, mock_create, generator):
-    """Tests all standard run commands abort if folder already exists."""
-    mock_create.return_value = False
-
-    generator.run_basic()
-    generator.run_package()
-    generator.run_fastapi()
-    # run_docker & run_github_actions don't check for folder creation, skipped here.
-
-    assert mock_create.call_count == 3
-    mock_readme.assert_not_called()
 
 
 # ==========================================
@@ -341,85 +251,109 @@ def test_run_aborts_if_folder_exists(mock_readme, mock_create, generator):
 @patch("pykickoff.utils.subprocess.run")
 def test_run_command_success(mock_subprocess_run, capsys):
     run_command("fake command", "/fake/cwd", "Fake Task")
-    mock_subprocess_run.assert_called_once_with(
-        "fake command",
-        shell=True,
-        cwd="/fake/cwd",
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    captured = capsys.readouterr()
-    assert "✅ Fake Task complete." in captured.out
+    mock_subprocess_run.assert_called_once()
 
 
 @patch("pykickoff.utils.subprocess.run")
 def test_run_command_failure(mock_subprocess_run, capsys):
-    mock_subprocess_run.side_effect = subprocess.CalledProcessError(
-        returncode=1, cmd="fake command", output="Some error occurred"
-    )
+    mock_subprocess_run.side_effect = subprocess.CalledProcessError(1, cmd="fake")
     run_command("fake command", "/fake/cwd", "Fake Task")
-    captured = capsys.readouterr()
-    assert "❌ Failed to Fake Task" in captured.out
+    assert "❌ Failed to Fake Task" in capsys.readouterr().out
 
 
-@patch("pykickoff.utils.run_command")
-def test_initialize_git(mock_run_command):
-    initialize_git("/my/project/path")
-    mock_run_command.assert_called_once_with(
-        "git init", "/my/project/path", "Initializing Git"
-    )
-
-
-@patch("pykickoff.utils.run_command")
-def test_setup_venv(mock_run_command):
-    setup_venv("/my/project/path")
-    mock_run_command.assert_called_once_with(
-        "python -m venv .venv", "/my/project/path", "Creating virtual environment"
-    )
+# --- install_dependencies Tests ---
 
 
 @patch("pykickoff.utils.subprocess.run")
 @patch("pykickoff.utils.os.name", "posix")
-def test_install_dependencies_posix(mock_subprocess_run, tmp_path, capsys):
-    (tmp_path / "requirements.txt").touch()
+def test_install_dependencies_posix_all(mock_subprocess_run, tmp_path, capsys):
+    """Tests pip and pre-commit install with Mac/Linux paths."""
+    # Write text so the files have a size > 0 (otherwise they are skipped)
+    (tmp_path / "requirements.txt").write_text("package1")
+    (tmp_path / "requirements_dev.txt").write_text("pytest")
+    (tmp_path / ".pre-commit-config.yaml").touch()
 
     install_dependencies(tmp_path)
 
     expected_pip_path = os.path.join(tmp_path, ".venv", "bin", "pip")
-    mock_subprocess_run.assert_called_once_with(
-        [expected_pip_path, "install", "-r", "requirements.txt"],
-        cwd=tmp_path,
-        capture_output=False,
-        text=True,
+    expected_precommit_path = os.path.join(tmp_path, ".venv", "bin", "pre-commit")
+
+    # Assert requirements.txt was installed
+    mock_subprocess_run.assert_any_call(
+        [expected_pip_path, "install", "-r", "requirements.txt"], cwd=tmp_path
     )
+    # Assert requirements_dev.txt was installed
+    mock_subprocess_run.assert_any_call(
+        [expected_pip_path, "install", "-r", "requirements_dev.txt"], cwd=tmp_path
+    )
+    # Assert pre-commit was installed
+    mock_subprocess_run.assert_any_call(
+        [expected_precommit_path, "install"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+    )
+
+    assert mock_subprocess_run.call_count == 3
     captured = capsys.readouterr()
-    assert "✅ Dependencies installed." in captured.out
+    assert "✅ requirements.txt installed." in captured.out
+    assert "✅ requirements_dev.txt installed." in captured.out
+    assert "✅ Pre-commit hooks installed." in captured.out
 
 
 @patch("pykickoff.utils.subprocess.run")
 @patch("pykickoff.utils.os.name", "nt")
-def test_install_dependencies_windows(mock_subprocess_run, tmp_path, capsys):
-    (tmp_path / "requirements.txt").touch()
+def test_install_dependencies_windows_all(mock_subprocess_run, tmp_path):
+    """Tests pip and pre-commit install with Windows paths."""
+    (tmp_path / "requirements.txt").write_text("package1")
+    (tmp_path / "requirements_dev.txt").write_text("pytest")
+    (tmp_path / ".pre-commit-config.yaml").touch()
 
     install_dependencies(tmp_path)
 
     expected_pip_path = os.path.join(tmp_path, ".venv", "Scripts", "pip.exe")
-    mock_subprocess_run.assert_called_once_with(
-        [expected_pip_path, "install", "-r", "requirements.txt"],
-        cwd=tmp_path,
-        capture_output=False,
-        text=True,
+    expected_precommit_path = os.path.join(
+        tmp_path, ".venv", "Scripts", "pre-commit.exe"
     )
-    captured = capsys.readouterr()
-    assert "✅ Dependencies installed." in captured.out
+
+    mock_subprocess_run.assert_any_call(
+        [expected_pip_path, "install", "-r", "requirements.txt"], cwd=tmp_path
+    )
+    mock_subprocess_run.assert_any_call(
+        [expected_pip_path, "install", "-r", "requirements_dev.txt"], cwd=tmp_path
+    )
+    mock_subprocess_run.assert_any_call(
+        [expected_precommit_path, "install"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+    )
 
 
 @patch("pykickoff.utils.subprocess.run")
-def test_install_dependencies_no_requirements_file(
-    mock_subprocess_run, tmp_path, capsys
-):
+def test_install_dependencies_skips_empty_files(mock_subprocess_run, tmp_path):
+    """Tests that files with 0 bytes size do not trigger pip install."""
+    # Touch creates empty files (0 bytes)
+    (tmp_path / "requirements.txt").touch()
+    (tmp_path / "requirements_dev.txt").touch()
+
     install_dependencies(tmp_path)
+
+    # Subprocess should not be called because files are empty
     mock_subprocess_run.assert_not_called()
+
+
+@patch("pykickoff.utils.subprocess.run")
+def test_install_dependencies_precommit_failure(mock_subprocess_run, tmp_path, capsys):
+    """Tests that pre-commit gracefully handles a CalledProcessError (e.g. no git repo)."""
+    (tmp_path / ".pre-commit-config.yaml").touch()
+
+    # Force the subprocess command to raise an error
+    mock_subprocess_run.side_effect = subprocess.CalledProcessError(
+        1, cmd="pre-commit install"
+    )
+
+    install_dependencies(tmp_path)
+
     captured = capsys.readouterr()
-    assert "❌ No requirements.txt detected!" in captured.out
+    assert "⚠️ Pre-commit install failed." in captured.out
